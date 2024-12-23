@@ -5,13 +5,10 @@ import http from 'http';
 
 // Initialize the Express app
 const app = express();
-const PORT = 5000;
-const PORT1 = 5001; // For server instance 1
-const PORT2 = 5002; // For server instance 2
 
-// Create HTTP server and WebSocket server
-const server = http.createServer(app);
-const io = new Server(server);
+// Define ports for multiple servers
+const PORT1 = 5001; // Server instance 1
+const PORT2 = 5002; // Server instance 2
 
 // Resolve the current directory
 const __dirname = path.resolve();
@@ -24,25 +21,35 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// WebSocket connection logic
-io.on('connection', (socket) => {
-    console.log('A user connected');
+// Function to create and start a server instance
+const startServer = (port) => {
+    const server = http.createServer(app);
+    const io = new Server(server);
 
-    // Listen for a message from the client
-    socket.on('message', (msg) => {
-        console.log('Message from client:', msg);
+    // WebSocket connection logic
+    io.on('connection', (socket) => {
+        console.log(`A user connected to server on port ${port}`);
 
-        // Send a response back to the client
-        socket.emit('message', `Server received: ${msg}`);
+        // Listen for a message from the client
+        socket.on('message', (msg) => {
+            console.log(`Message from client on port ${port}:`, msg);
+
+            // Send a response back to the client
+            socket.emit('message', `Server on port ${port} received: ${msg}`);
+        });
+
+        // Handle client disconnect
+        socket.on('disconnect', () => {
+            console.log(`A user disconnected from server on port ${port}`);
+        });
     });
 
-    // Handle client disconnect
-    socket.on('disconnect', () => {
-        console.log('A user disconnected');
+    // Start the server
+    server.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
     });
-});
+};
 
-// Start the server
-server.listen(PORT || PORT1 ||PORT2, () => {
-    console.log(`Server running on http://localhost:${PORT}`,`Server running on http://localhost:${PORT1}`,`Server running on http://localhost:${PORT2}`);
-});
+// Start server instances
+startServer(PORT1);
+startServer(PORT2);

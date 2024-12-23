@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>WebSocket Client</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>WebSocket Communication</h1>
+    <div id="messages"></div>
+
+    <script>
+      var socket = io();
+
+      // Listen for messages from the server
+      socket.on('message', function (data) {
+        var message = document.createElement('p');
+        message.innerText = data;
+        document.getElementById('messages').appendChild(message);
+      });
+
+      // Send a message to the server
+      socket.emit('clientMessage', 'Hello from client!');
+    </script>
+  </body>
+</html>
